@@ -53,75 +53,41 @@ const graphMaker = function() {
 }
 graphMaker()
 
-const knightMoves = function (startCell, endCell, queue = [startCell], steps = [startCell[0]+startCell[1]*8], paths = []) {
+const knightMoves = function (startCell, endCell, queue = [startCell[0]+startCell[1]*8], prevSquare = [], steps = [startCell[0]+startCell[1]*8] ) {
     //check for out of bound
     if (startCell[0]<=7 && startCell[1]<=7 && 
         endCell[0]<=7 && endCell[1]<=7) {
 
         //check base case for recursion
-        if (queue.length===0) {
-            return paths
+        if (startCell[0]===endCell[0] &&
+            startCell[1]===endCell[1]) {
+            return steps
         } else {
+            // small math to convert x and y to a simple number that corresponds to index
             let currenIndex = startCell[0] + startCell[1]*8
             let endIndex = endCell[0]+endCell[1]*8
-            
-            const stepMaker = function (x, y) {
-                let nextXCordinate = startCell[0]+x
-                let nextYCordinate = startCell[1]+y
-
-                let newIndex = nextXCordinate + nextYCordinate*8
-                //check if it is already in the que
-
-                if (!queue.includes(newIndex) && !steps.includes(newIndex)) {
-                    queue.push(newIndex)
-                    steps.push(newIndex)
-                    if (steps.includes(endIndex)) {
-                        paths.push(steps)
-                    }
+            //going through each move
+            for (let item of chessBoard[currenIndex]) {
+                let  convertedIndex = [item%8, (item-item%8)/8]
+                if (endIndex === item) {
+                    steps.push(item)
+                    return steps
+                }
+                if (!prevSquare.includes(item) && !queue.includes(item)) {
+                    queue.push(item)
                 }
             }
-            
-            //up right, check for out of board
-            if (startCell[0]<=6 && startCell[1]<=5) {
-                stepMaker(+1, +2)
-            } 
-            //up left
-            if (startCell[0]>=1 && startCell[1]<=5) {
-                stepMaker(-1, +2)
-            }
-            //right top
-            if (startCell[0]<=5 && startCell[1]<=6) {
-                stepMaker(+2, +1)
-            }
-            //right down
-            if (startCell[0]<=5 && startCell[1]>=1) {
-                stepMaker(+2, -1)
-            }
-            //down right
-            if (startCell[0]<=6 && startCell[1]>=2) {
-                stepMaker(+1, -2)
-            }
-            //down left
-            if (startCell[0]>=1 && startCell[1]>=2) {
-                stepMaker(-1, -2)
-            }
-            //left up
-            if (startCell[0]>=2 && startCell[1]<=6) {
-                stepMaker(-2, +1)
-            }//left down
-            if (startCell[0]>=2 && startCell[1]>=1) {
-                stepMaker(-2, -1)
-            }
-            
-            queue.splice(0,1)
+
+            prevSquare.push(queue.splice(0,1)[0])
+
             let convertedIndex = [queue[0]%8, (queue[0]-queue[0]%8)/8] 
-            return knightMoves(convertedIndex, endCell, queue, steps)
+            return knightMoves(convertedIndex, endCell, queue, prevSquare, steps)
         }
     } else {
         alert('out of board !')
     }
 }
 
-console.log(knightMoves([1,1], [0,7]))
+console.log(knightMoves([0,0], [7,7]))
 console.log(chessBoard)
 

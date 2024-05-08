@@ -53,41 +53,61 @@ const graphMaker = function() {
 }
 graphMaker()
 
-const knightMoves = function (startCell, endCell, queue = [startCell[0]+startCell[1]*8], prevSquare = [], steps = [startCell[0]+startCell[1]*8] ) {
+const knightMoves = function (startCell, endCell) {
     //check for out of bound
     if (startCell[0]<=7 && startCell[1]<=7 && 
         endCell[0]<=7 && endCell[1]<=7) {
 
-        //check base case for recursion
-        if (startCell[0]===endCell[0] &&
-            startCell[1]===endCell[1]) {
-            return steps
-        } else {
-            // small math to convert x and y to a simple number that corresponds to index
-            let currenIndex = startCell[0] + startCell[1]*8
-            let endIndex = endCell[0]+endCell[1]*8
-            //going through each move
-            for (let item of chessBoard[currenIndex]) {
-                let  convertedIndex = [item%8, (item-item%8)/8]
-                if (endIndex === item) {
-                    steps.push(item)
-                    return steps
-                }
-                if (!prevSquare.includes(item) && !queue.includes(item)) {
-                    queue.push(item)
-                }
+        // small math to convert x and y to a simple number that corresponds to index
+        let currentSquare = startCell[0] + startCell[1]*8
+        let startSquare = startCell[0] + startCell[1]*8
+        let endSquare = endCell[0]+endCell[1]*8
+        let queue = [currentSquare]
+        let steps = []
+        let previousSquares = []
+
+        while (currentSquare!==endSquare) {
+            //for loop that goes inside each item 
+            for (let square of chessBoard[currentSquare]) {
+                if (square===endSquare) {
+                    steps.push(currentSquare)
+                    steps.push(square)
+                    let parentSquare = 100                   
+
+                    //loop that goes back to origin to reconstruct path
+                    while (steps[0]!==startSquare) {
+                        chessBoard[steps[0]].forEach((square)=> {
+                            //item must be in previousSquare if it is parent
+                            if (previousSquares.includes(square)) {
+                                //note the index in prev
+                                let indexInPrevSquares = previousSquares.indexOf(square)
+                                parentSquare = Math.min(indexInPrevSquares, parentSquare)
+                            }
+                        })
+                        steps.splice(0,0, previousSquares[parentSquare])
+                    }
+                    //creating cordinates
+                    steps.forEach((item, index)=> {
+                        steps[index]= [item%8, (item-item%8)/8]
+                    })
+
+                    console.log(`you made it in ${steps.length-1} moves ! Here is the path:`) 
+                    return steps.forEach(item=> console.log(item))
+                } else if (!queue.includes(square) && !previousSquares.includes(square)) {
+                    queue.push(square)
+                } 
             }
 
-            prevSquare.push(queue.splice(0,1)[0])
-
-            let convertedIndex = [queue[0]%8, (queue[0]-queue[0]%8)/8] 
-            return knightMoves(convertedIndex, endCell, queue, prevSquare, steps)
+            previousSquares.push(queue.splice(0,1)[0])
+            currentSquare = queue[0]
         }
+
     } else {
         alert('out of board !')
     }
 }
 
-console.log(knightMoves([0,0], [7,7]))
-console.log(chessBoard)
+knightMoves([7,7], [5,4])
+
+
 
